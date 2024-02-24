@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import {
@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -122,7 +123,9 @@ export default function Home() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Create Course</DropdownMenuItem>
+            <Link href="/create-course">
+              <DropdownMenuItem>Create Course</DropdownMenuItem>
+            </Link>
             <DropdownMenuItem>Create Assestment</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
