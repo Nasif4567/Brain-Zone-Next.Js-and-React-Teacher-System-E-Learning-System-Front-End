@@ -25,6 +25,7 @@ import { PDFViewer } from '@react-pdf/renderer';
 export default function Page() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const [editOpen, setEditOpen] = React.useState(false);
   const [courseContent, setCourseContent] = React.useState([
     {
         id: 1,
@@ -95,7 +96,9 @@ export default function Page() {
           <div className="course-main w-4/5 h-full bg-white p-4">
             <div className="w-full flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold">Course Content 1</h2>
-              <Button>Edit</Button>
+              <Button 
+                onClick={() => setEditOpen(true)}
+              >Edit</Button>
             </div>
             <Collapsible
               open={isOpen}
@@ -234,24 +237,22 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <Dialog open={open} onOpenChange={setOpen}>
+
+      {addCourseDialog()}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Course Content</DialogTitle>
-            <DialogDescription>Add content to your course</DialogDescription>
+            <DialogTitle>Edit Course Content</DialogTitle>
+            <DialogDescription>Edit your course content</DialogDescription>
           </DialogHeader>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Content Name</Label>
-              <Input id="name" placeholder="Title of your content" value={contentName} 
-                onChange={(e)=>setContentName(e.target.value)}
-              />
+              <Input id="name" placeholder="Title of your content" />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="description">Content Description</Label>
-              <Input id="description" placeholder="Description"  value={contentDescription}
-                onChange={(e)=>setContentDescription(e.target.value)}
-              />
+              <Input id="description" placeholder="Description" />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="category">Upload File</Label>
@@ -259,20 +260,54 @@ export default function Page() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
+            <Button variant="ghost" onClick={() => setEditOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={()=>{
-                addToList();
-                setOpen(false);
-                setContentName("");
-                setContentDescription("");
-
-            }}>Add Content</Button>
-            </DialogFooter>
+            <Button onClick={() => setEditOpen(false)}>Save</Button>
+          </DialogFooter>
         </DialogContent>
-       
       </Dialog>
+
     </>
   );
+
+  function addCourseDialog() {
+    return <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Course Content</DialogTitle>
+          <DialogDescription>Add content to your course</DialogDescription>
+        </DialogHeader>
+        <div className="grid w-full items-center gap-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="name">Content Name</Label>
+            <Input id="name" placeholder="Title of your content" value={contentName}
+              onChange={(e) => setContentName(e.target.value)} />
+          </div>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="description">Content Description</Label>
+            <Input id="description" placeholder="Description" value={contentDescription}
+              onChange={(e) => setContentDescription(e.target.value)} />
+          </div>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="category">Upload File</Label>
+            <Input type="file" id="file" placeholder="Upload File" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={() => {
+            addToList();
+            setOpen(false);
+            setContentName("");
+            setContentDescription("");
+
+          } }>Add Content</Button>
+        </DialogFooter>
+      </DialogContent>
+
+    </Dialog>;
+  }
 }

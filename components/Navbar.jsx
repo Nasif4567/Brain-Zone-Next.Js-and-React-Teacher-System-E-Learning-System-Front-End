@@ -8,12 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import Link from "next/link";
 const Navbar = () => {
   return (
     <nav className="flex m-2 p-10 justify-between items-center">
       {/* Navbar content goes here */}
+      <Link href={"/"}>
       <h2 className="text-2xl font-sans font-semibold">Teacher</h2>
+      </Link>
       <ul className="flex space-x-4">
         <li>Courses</li>
         <li>Students</li>
