@@ -17,7 +17,9 @@ const Navbar = () => {
       <h2 className="text-2xl font-sans font-semibold">Teacher</h2>
       </Link>
       <ul className="flex space-x-4">
+        <Link href={"/course"}>
         <li>Courses</li>
+        </Link>
         <li>Students</li>
       </ul>
 
