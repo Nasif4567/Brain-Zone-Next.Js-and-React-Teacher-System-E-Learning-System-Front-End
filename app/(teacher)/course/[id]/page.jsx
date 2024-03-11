@@ -31,15 +31,14 @@ export default function Page() {
       title: "Course Content 1",
       description:
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt nisi soluta aspernatur consectetur neque molestias nobis reiciendis cum. Qui tempore accusamus placeat laudantium sed....",
-        pdfURL: 'https://www.abdullahibnshahin.com/detailedcv.pdf'
-      
+      pdfURL: "https://www.abdullahibnshahin.com/detailedcv.pdf",
     },
     {
       id: 2,
       title: "Course Content 2",
       description:
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt nisi soluta aspernatur consectetur neque molestias nobis reiciendis cum. Qui tempore accusamus placeat laudantium sed....",
-        pdfURL: 'https://www.abdullahibnshahin.com/detailedcv.pdf'
+      pdfURL: "https://www.abdullahibnshahin.com/detailedcv.pdf",
     },
   ]);
 
@@ -66,6 +65,9 @@ export default function Page() {
           <h1 className="text-2xl font-bold p-4">
             Course Name
             <span className="text-lg font-normal"> - Course Code</span>
+            <span className="text-sm font-normal">
+              <Button className="ml-4">Forum</Button>
+            </span>
           </h1>
           <div className="flex space-x-4 p-4">
             <Button variant="outline" onClick={() => setOpen(true)}>
@@ -220,52 +222,54 @@ export default function Page() {
             </div>
           )}
 
-          {contentType === "assestments" &&
-            step ===1 &&(
-                <div className="grid w-full items-center gap-4">
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="name">Assesstment Name</Label>
-                    <Input id="name" placeholder="Title of your content" />
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="description">Assesstment Description</Label>
-                    <Input id="description" placeholder="Description" />
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="category">Due Date</Label>
-                    <Input type="date" id="date" />
-                  </div>
-                </div>
-              )}
-          {step===0 && (
-          <div className="flex flex-row space-x-4">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setSet(step + 1);
-                setContentType("notes");
-              }}
-            >
-              Add Notes
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setSet(step + 1);
-                setContentType("assestments");
-              }}
-            >
-              Add Assesstments
-            </Button>
-          </div>
+          {contentType === "assestments" && step === 1 && (
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="name">Assesstment Name</Label>
+                <Input id="name" placeholder="Title of your content" />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="description">Assesstment Description</Label>
+                <Input id="description" placeholder="Description" />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="category">Due Date</Label>
+                <Input type="date" id="date" />
+              </div>
+            </div>
+          )}
+          {step === 0 && (
+            <div className="flex flex-row space-x-4">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSet(step + 1);
+                  setContentType("notes");
+                }}
+              >
+                Add Notes
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSet(step + 1);
+                  setContentType("assestments");
+                }}
+              >
+                Add Assesstments
+              </Button>
+            </div>
           )}
           {contentType === "notes" && (
             <DialogFooter>
-              <Button variant="ghost" onClick={() => {
-                 setSet(0);
-                 setOpen(false);
-                 setContentType("");
-              }}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSet(0);
+                  setOpen(false);
+                  setContentType("");
+                }}
+              >
                 Cancel
               </Button>
               <Button
@@ -276,7 +280,6 @@ export default function Page() {
                   setContentDescription("");
                   setSet(0);
                   setContentType("");
-
                 }}
               >
                 Add Content
@@ -286,11 +289,14 @@ export default function Page() {
 
           {contentType === "assestments" && (
             <DialogFooter>
-              <Button variant="ghost" onClick={() =>{
-                setSet(0);
-                setOpen(false);
-                setContentType("");
-              }}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSet(0);
+                  setOpen(false);
+                  setContentType("");
+                }}
+              >
                 Cancel
               </Button>
               <Button
@@ -305,9 +311,6 @@ export default function Page() {
               </Button>
             </DialogFooter>
           )}
-
-
-
         </DialogContent>
       </Dialog>
     );
