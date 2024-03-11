@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -45,7 +46,7 @@ export default function Page() {
             <CardDescription>
               <div className="flex justify-center">
                 <p>
-                  Don't have an account? <a href="/register">Register</a>
+                  Don't have an account? <Link href="/register">Register</Link>
                 </p>
               </div>
             </CardDescription>
