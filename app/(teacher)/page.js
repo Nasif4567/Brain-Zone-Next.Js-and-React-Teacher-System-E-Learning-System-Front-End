@@ -20,8 +20,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import FloatingButton from "@/components/FloatingButton";
+import axios from "axios";
+import APIURL from "@/lib/variables";
 
 export default function Home() {
+  
   return (
     <div className="container dashboard h-screen">
       <Navbar />
