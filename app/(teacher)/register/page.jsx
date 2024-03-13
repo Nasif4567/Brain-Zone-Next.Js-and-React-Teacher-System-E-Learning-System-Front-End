@@ -17,11 +17,13 @@ import { useEffect,useState } from "react";
 import axios from 'axios';
 import APIURL from "@/lib/variables";
 import { useToast } from "@/components/ui/use-toast"
+import { setCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,6 +32,7 @@ export default function Page() {
   const [error, setError] = useState(null);
   const url = APIURL;
   const {toast} = useToast();
+  const router = useRouter();
  
   
 
@@ -49,9 +52,15 @@ export default function Page() {
           password,
           name
       })
-      console.log(res)
+      
+      dispatch(setUser(res.data.user))
+      setCookie("token", res.data.token, {
+        maxAge: 30 * 24 * 60 * 60,
+        path: "/",
+      });
       
       setLoading(false)
+      router.replace("/")
       
     } catch (error) {
         console.log(error)
@@ -76,11 +85,14 @@ export default function Page() {
       <div className="m-auto w-1/2">
         <Card className="mx-auto h-full w-2/4 shadow-md">
           <CardHeader>
-            <CardTitle>Teacher Login</CardTitle>
+            <CardTitle>Teacher Register</CardTitle>
+            <CardDescription>
+              Enter your details to register
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <CardDescription>
-              <div className="flex flex-col space-y-4">
+            
+            <div className="flex flex-col space-y-4">
                 <input
                   type="text"
                   placeholder="username"
@@ -122,22 +134,26 @@ export default function Page() {
                     onChange={(e) => setRePassword(e.target.value)}
                     required
                 />
-                <button className="rounded-lg bg-blue-500 p-2 text-white"
+                <button className={`rounded-lg bg-blue-500 p-2 text-white 
+                ${loading && "bg-gray-500 animate-pulse text-gray-300 cursor-not-allowed"}
+                `}
+                disabled={loading}
                 onClick={register}
                 >
                   Register
                 </button>
               </div>
-            </CardDescription>
           </CardContent>
           <CardFooter>
-            <CardDescription>
+          
               <div className="flex justify-center">
                 <p>
-                  Have an account? <Link href="/login">Login</Link>
+                  Have an account? <span 
+                  onClick={() => router.replace("/login")}
+                  >Login</span>
                 </p>
               </div>
-            </CardDescription>
+           
           </CardFooter>
         </Card>
       </div>
