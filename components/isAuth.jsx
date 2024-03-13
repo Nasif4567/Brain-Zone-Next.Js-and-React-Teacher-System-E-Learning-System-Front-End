@@ -28,8 +28,12 @@ function IsAuth({ children }) {
         dispatch(setUser(res.data));
         return true;
       } catch (err) {
-        if (err?.message === "Token expired") {
+        console.log(err);
+        if (err?.response?.message === "Token expired") {
           return "not-verified";
+        }
+        if(err?.response?.message === "Token not provided"){
+          return "not-verified"
         }
 
         return false;
@@ -41,27 +45,28 @@ function IsAuth({ children }) {
 
   useLayoutEffect(() => {
     isAuthenicated().then((res) => {
-      if (res === "not-verified") {
+      if (res === "not-verified" && pathName !== "/login" && pathName !== "/register") {
         toast.toast({
           title: "Error",
           description: "Please Login to continue",
         });
-        router.push("/login");
+        router.replace("/login");
       }
-      if (!res) {
+      if (res === true && pathName === "/login") {
+        router.replace("/");
+      }
+      if (res === true && pathName === "/register") {
+        router.replace("/");
+      }
+      if (!res && pathName !== "/login" && pathName !== "/register") {
         toast.toast({
           title: "Error",
           description: "Please login to continue",
           variant: "destructive",
         });
-        router.push("/login");
+        router.replace("/login");
       }
-      if (res === true && pathName === "/login") {
-        router.push("/");
-      }
-      if (res === true && pathName === "/register") {
-        router.push("/");
-      }
+      
     });
   }, []);
 

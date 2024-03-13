@@ -1,5 +1,5 @@
 "use client";
-import React,{useState} from "react";
+import React, { useState } from "react";
 import loginAnimation from "@/assets/animation-login.json";
 import Lottie from "lottie-react";
 import {
@@ -12,110 +12,115 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import axios from "axios";
-import {useSelector, useDispatch} from "react-redux";
-import {setUser} from "@/redux/authSlice";
-import {useRouter} from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "@/redux/authSlice";
+import { useRouter } from "next/navigation";
 import APIURL from "@/lib/variables";
-import { useToast } from "@/components/ui/use-toast"
-import { setCookie } from 'cookies-next';
-
-
+import { useToast } from "@/components/ui/use-toast";
+import { setCookie } from "cookies-next";
 
 export default function Page() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const {toast} = useToast();
-
+  const { toast } = useToast();
 
   const user = useSelector((state) => state.auth.user);
   if (user) {
-    router.push("/");
+    router.replace("/");
   }
 
   const handleLogin = async () => {
-    if(username === "" || password === ""){
+    if (username === "" || password === "") {
       toast({
         title: "Error",
-        description : "Please fill in all the fields",
-      })
+        description: "Please fill in all the fields",
+      });
       return;
     }
-    try{
-
-      const res = await axios.post(`${APIURL}/login`,{
+    try {
+      setLoading(true);
+      const res = await axios.post(`${APIURL}/login`, {
         username,
-        password
+        password,
       });
       dispatch(setUser(res.data.user));
-      console.log(res)
+      
       setCookie("token", res.data.token, {
         maxAge: 30 * 24 * 60 * 60,
         path: "/",
       });
-      router.push("/");
-
-
-    }catch(e){
+      setLoading(false);
+      router.replace("/");
+    } catch (e) {
       console.log(e);
+      setLoading(false);
       toast({
         title: "Error",
-        description : e.response.data,
-      })
-
+        description: e.response.data,
+        variant :"destructive"
+      });
     }
-
-
-
-  }
-
-
+  };
 
   return (
     <div className="container flex h-screen ">
       <div className="m-auto w-1/2">
         <Lottie animationData={loginAnimation} />
       </div>
-      <div className="m-auto w-1/2">
-        <Card className="mx-auto h-full w-2/4 shadow-md">
+      <div className="m-auto w-1/2 flex items-center ">
+        <Card className="w-1/2 mx-auto">
           <CardHeader>
-            <CardTitle>Teacher Login</CardTitle>
+            <CardTitle>Login to the Teacher Portal</CardTitle>
+            <CardDescription>
+              Enter your username and password to login
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <CardDescription>
-              <div className="flex flex-col space-y-4">
-                <input
-                  type="text"
-                  placeholder="username"
-                  className="rounded-lg border-2 border-gray-300 p-2"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                  type="password"
-                  placeholder="password"
-                  className="rounded-lg border-2 border-gray-300 p-2"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button className="rounded-lg bg-blue-500 p-2 text-white"
-                  onClick={handleLogin}
-                >
-                  Login
-                </button>
-              </div>
-            </CardDescription>
+            <div className="flex flex-col space-y-2">
+              <input
+                type="text"
+                placeholder="Username"
+                className="p-2 rounded-md border"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                className="p-2 rounded-md border"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                className={`bg-blue-500 text-white p-2 rounded-md
+                ${loading && "bg-gray-500"}
+                `}
+                onClick={handleLogin}
+                disabled={loading}
+
+              >
+                Login
+              </button>
+             
+            </div>
+
+
           </CardContent>
           <CardFooter>
-            <CardDescription>
-              <div className="flex justify-center">
-                <div>
-                  Don't have an account? <Link href="/register">Register</Link>
-                </div>
-              </div>
-            </CardDescription>
+            <p>
+              Don't have an account?{" "}
+              
+              <span className="text-blue-500"
+              onClick={() => router.replace("/register")}
+              >
+                Register
+              </span>
+            </p>
           </CardFooter>
         </Card>
       </div>
