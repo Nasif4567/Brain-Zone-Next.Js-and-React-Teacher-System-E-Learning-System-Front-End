@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "@/redux/provider";
 import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] });
+import IsAuth from "@/components/isAuth";
 
 export const metadata = {
   title: "Create Next App",
@@ -15,8 +16,9 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         
         <Providers>
+          <IsAuth>
         {children}
-       
+        </IsAuth>
         </Providers>
         <Toaster />
         

@@ -7,9 +7,9 @@ export default function FloatingButton() {
     <div className="fixed bottom-10 right-10">
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <button className="bg-blue-500 text-white w-14 h-14 text-3xl rounded-full">
+            <div className="bg-blue-500 text-white w-14 h-14 text-3xl rounded-full">
               +
-            </button>
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <Link href="/create-course">

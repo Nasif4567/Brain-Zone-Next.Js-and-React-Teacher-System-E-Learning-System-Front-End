@@ -1,4 +1,4 @@
-"use client";
+
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import {
@@ -71,28 +71,29 @@ export default function Home() {
            
           </TableHeader>
           <TableBody>
-            
+          
             <TableRow>
-            <Link href="/course/1">
+           
               <TableCell>Mathematics</TableCell>
-              </Link>
+             
               <TableCell>Math101</TableCell>
               <TableCell>3 Assignments</TableCell>
               <TableCell>20</TableCell>
             </TableRow>
+           
             
             <TableRow>
-              <Link href="/course/1">
+              
               <TableCell>Physics</TableCell>
-              </Link>
+            
               <TableCell>Phy101</TableCell>
               <TableCell>3 Exams</TableCell>
               <TableCell>20</TableCell>
             </TableRow>
             <TableRow>
-              <Link href="/course/1">
+            
               <TableCell>Chemistry</TableCell>
-              </Link>
+              
               <TableCell>Chem101</TableCell>
               <TableCell>3 Quiz</TableCell>
               <TableCell>20</TableCell>
