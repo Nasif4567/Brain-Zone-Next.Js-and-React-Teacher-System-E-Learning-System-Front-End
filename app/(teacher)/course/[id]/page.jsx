@@ -21,7 +21,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PDFViewer from "@/components/PDFViewer";
 
-export default function Page() {
+export default function Page({params}) {
+  const id = params.id;
+  console.log(id);
   const [isOpen, setIsOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);

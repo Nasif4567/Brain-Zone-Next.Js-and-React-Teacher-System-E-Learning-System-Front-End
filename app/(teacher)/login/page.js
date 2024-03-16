@@ -51,11 +51,15 @@ export default function Page() {
       dispatch(setUser(res.data.user));
       
       setCookie("token", res.data.token, {
-        maxAge: 30 * 24 * 60 * 60,
+        maxAge: 60 * 60 * 24 * 7,
         path: "/",
       });
       setLoading(false);
       router.replace("/");
+      toast({
+        title: "Success",
+        description: res.data.message,
+      });
     } catch (e) {
       console.log(e);
       setLoading(false);
