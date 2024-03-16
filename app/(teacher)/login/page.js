@@ -99,6 +99,12 @@ export default function Page() {
                 className="p-2 rounded-md border"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleLogin();
+                  }
+                
+                }}
               />
               <button
                 className={`bg-blue-500 text-white p-2 rounded-md

@@ -133,6 +133,12 @@ export default function Page() {
                     value={rePassword}
                     onChange={(e) => setRePassword(e.target.value)}
                     required
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        register();
+                      }
+                    
+                    }}
                 />
                 <button className={`rounded-lg bg-blue-500 p-2 text-white 
                 ${loading && "bg-gray-500 animate-pulse text-gray-300 cursor-not-allowed"}
