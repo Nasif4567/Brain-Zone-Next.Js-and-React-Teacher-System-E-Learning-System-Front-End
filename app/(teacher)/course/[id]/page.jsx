@@ -20,13 +20,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PDFViewer from "@/components/PDFViewer";
+import axios from "axios";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Page({params}) {
   const id = params.id;
-  console.log(id);
   const [isOpen, setIsOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const { toast } = useToast();
   const [courseContent, setCourseContent] = useState([
     {
       id: 1,
@@ -47,17 +49,57 @@ export default function Page({params}) {
   const [contentName, setContentName] = useState("");
   const [contentDescription, setContentDescription] = useState("");
 
-  const addToList = () => {
-    setCourseContent([
-      ...courseContent,
-      {
-        id: courseContent.length + 1,
-        title: contentName,
-        description: contentDescription,
+  // const addToList = () => {
+  //   setCourseContent([
+  //     ...courseContent,
+  //     {
+  //       id: courseContent.length + 1,
+  //       title: contentName,
+  //       description: contentDescription,
+  //     },
+  //   ]);
+  //   setOpen(false);
+  // };
+
+  async function addToList() {
+    const formData = new FormData();
+    formData.append('file', document.querySelector('#file').files[0]);
+    formData.append('title', contentName);
+    formData.append('description', contentDescription);
+    formData.append('type', 'pdf');
+    
+    try{
+  
+    const response = await axios.post(`http://localhost:3000/content/upload/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       },
-    ]);
-    setOpen(false);
-  };
+      withCredentials: true
+    });
+    console.log(response);
+
+    toast({
+      title: "Content added successfully",
+      description: "You have successfully added a new content",
+    });
+
+    if(response.status === 200){
+      setCourseContent([
+        ...courseContent,
+        {
+          id: response.data.contentID,
+          title: contentName,
+          description: contentDescription,
+        },
+      ]);
+      setOpen(false);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  
+    
+  }
 
   return (
     <>
