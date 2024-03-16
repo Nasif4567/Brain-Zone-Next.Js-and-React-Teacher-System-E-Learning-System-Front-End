@@ -15,27 +15,30 @@ export default function CourseCard({course}) {
     const [openDialog, setOpenDialog] = useState(false)
   return (
     <>
-     <Card key={course.id} className='h-fit '>
+     <Card key={course.courseID} className='h-fit '>
             <CardHeader>
                 <img
-                src={course.image}
-                alt={course.title}
+                src={"https://source.unsplash.com/1600x900/?" + course.courseTitle}
+                alt={course.courseTitle}
                 className='w-full h-40 object-cover'
                 />
             </CardHeader>
             <CardContent>
-                <CardTitle className='h-12'>{course.title}</CardTitle>
-                <CardDescription className='my-2'>{course.description}</CardDescription>
+                <CardTitle className='h-12'>{course.courseName}</CardTitle>
+                <CardDescription className='my-2'>{course.courseDescription}</CardDescription>
             </CardContent>
             <CardFooter className='flex flex-col items-start space-y-2'>
                 <div className='flex flex-col'>
-                <p>{course.students} Students</p>
-                <p>{course.assestments} Assestments</p>
+                <p>{course.courseDuration} </p>
+                <p>{
+                    course.courseDifficulty?.charAt(0).toUpperCase() + course.courseDifficulty?.slice(1)
+                    
+                } </p>
                 </div>
                 
                 <div className='flex justify-between space-x-2'>
                     
-                    <Link href={`/course/${course.id}`}>
+                    <Link href={`/course/${course.courseID}`}>
                     <Button className='bg-cyan-700' >View</Button>
                     </Link>
                     <Button variant='outline'

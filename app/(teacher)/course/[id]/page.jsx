@@ -1,7 +1,7 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,7 +22,9 @@ import { Label } from "@/components/ui/label";
 import PDFViewer from "@/components/PDFViewer";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
-
+import {useDispatch, useSelector} from 'react-redux';
+import { setCourseContent } from "@/redux/courseContentSlice";
+import APIURL from "@/lib/variables";
 export default function Page({params}) {
   const id = params.id;
   const [isOpen, setIsOpen] = useState(false);
@@ -45,21 +47,40 @@ export default function Page({params}) {
       pdfURL: "https://www.abdullahibnshahin.com/detailedcv.pdf",
     },
   ]);
+  const courseContentData = useSelector((state) => state.courseContent?.courseContent);
+  const dispatch = useDispatch();
+
+
 
   const [contentName, setContentName] = useState("");
   const [contentDescription, setContentDescription] = useState("");
 
-  // const addToList = () => {
-  //   setCourseContent([
-  //     ...courseContent,
-  //     {
-  //       id: courseContent.length + 1,
-  //       title: contentName,
-  //       description: contentDescription,
-  //     },
-  //   ]);
-  //   setOpen(false);
-  // };
+  useLayoutEffect(() => {
+
+    if(courseContentData){
+      return
+    }
+
+    async function fetchCourseContent() {
+      try {
+        const response = await axios.get(`http://localhost:3000/content/${id}`, {
+          withCredentials: true,
+        });
+        console.log(response);
+        if (response.status === 200) {
+          dispatch(setCourseContent(response.data));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    fetchCourseContent();
+  }, [id, courseContentData, dispatch]);
+
+  
+
+  
 
   async function addToList() {
     const formData = new FormData();
@@ -124,18 +145,37 @@ export default function Page({params}) {
             <h2 className="text-xl font-bold my-2">Content</h2>
             <ul className="space-y-2">
               {courseContent.map((content) => (
+                
                 <li
-                  key={content.id}
+                  key={content.contentID}
                   className="text-lg  p-5 flex flex-col rounded-sm shadow-md transition-all cursor-pointer duration-300 hover:bg-gray-100"
                 >
-                  {content.title}
+                  {
+                    content.contentTitle
+                  }
                   <span className="text-sm font-normal my-2">
-                    {content.description.slice(0, 50)}
+                    {content?.contentDescription?.slice(0, 50)}
                   </span>
                 </li>
               ))}
+              {courseContent?.length === 0 && (
+                <li className="text-lg  p-5 flex flex-col rounded-sm shadow-md transition-all cursor-pointer duration-300 hover:bg-gray-100">
+                  No content available
+                </li>
+              
+              )}
             </ul>
           </div>
+          {courseContent?.length === 0 && (
+            <div className="course-main w-4/5 h-full bg-white p-4">
+              <div className="w-full flex flex-col justify-between items-center mb-8">
+                <h2 className="text-2xl font-bold">No Content Available</h2>
+                <p className="text-sm font-normal"> Add content to your course</p>
+              </div>
+            </div>
+          
+          )}
+          {courseContent?.length > 0 && (
           <div className="course-main w-4/5 h-full bg-white p-4">
             <div className="w-full flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold">Course Content 1</h2>
@@ -194,6 +234,7 @@ export default function Page({params}) {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
 

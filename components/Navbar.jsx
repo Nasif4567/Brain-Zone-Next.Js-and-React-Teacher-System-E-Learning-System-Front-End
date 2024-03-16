@@ -44,7 +44,7 @@ const Navbar = () => {
             <Avatar>
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>
-                {user?.name?.charAt(0).toUpperCase()}
+                User
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
