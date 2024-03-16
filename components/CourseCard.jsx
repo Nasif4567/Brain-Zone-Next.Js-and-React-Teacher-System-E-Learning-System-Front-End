@@ -24,16 +24,16 @@ export default function CourseCard({course}) {
                 />
             </CardHeader>
             <CardContent>
-                <CardTitle className='h-12'>{course.courseName}</CardTitle>
-                <CardDescription className='my-2'>{course.courseDescription}</CardDescription>
+                <CardTitle className='h-fit my-2'>{course.courseName}</CardTitle>
+                <CardDescription className=''>{course.courseDescription}</CardDescription>
             </CardContent>
             <CardFooter className='flex flex-col items-start space-y-2'>
                 <div className='flex flex-col'>
-                <p>{course.courseDuration} </p>
-                <p>{
-                    course.courseDifficulty?.charAt(0).toUpperCase() + course.courseDifficulty?.slice(1)
+                <p className='text-sm my-1'>
                     
-                } </p>
+                Duration:    {course.courseDuration} </p>
+                <p className='text-sm my-1'>
+                 Course Diffculty:   {course.courseDifficulty?.charAt(0).toUpperCase() + course.courseDifficulty?.slice(1)} </p>
                 </div>
                 
                 <div className='flex justify-between space-x-2'>
