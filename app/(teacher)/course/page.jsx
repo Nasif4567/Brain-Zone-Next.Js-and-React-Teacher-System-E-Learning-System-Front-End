@@ -16,6 +16,8 @@ export default  function Page() {
   const [courses, setCoursesData] = useState([]);
   const dispatch = useDispatch();
   const coursesState = useSelector(state => state.courses.courses);
+  const [loading, setLoading] = useState(false);
+
 
 
   // const fetchCourses = async () => {
@@ -63,7 +65,11 @@ export default  function Page() {
         className="grid lg:grid-cols-4 gap-4 p-4 w-full h-full overflow-y-auto
         md:grid-cols-3 sm:grid-cols-2  grid-cols-1
         "
-      >
+      > 
+      {loading && <div className="w-full h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>}
+      
         {courses.map((course) => (
           <CourseCard key={course.courseID} course={course} />
         ))}

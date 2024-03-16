@@ -1,7 +1,7 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,20 +32,6 @@ export default function Page({params}) {
   const [editOpen, setEditOpen] = useState(false);
   const { toast } = useToast();
   const [courseContent, setCourseContent] = useState([
-    {
-      id: 1,
-      title: "Course Content 1",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt nisi soluta aspernatur consectetur neque molestias nobis reiciendis cum. Qui tempore accusamus placeat laudantium sed....",
-      pdfURL: "https://www.abdullahibnshahin.com/detailedcv.pdf",
-    },
-    {
-      id: 2,
-      title: "Course Content 2",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt nisi soluta aspernatur consectetur neque molestias nobis reiciendis cum. Qui tempore accusamus placeat laudantium sed....",
-      pdfURL: "https://www.abdullahibnshahin.com/detailedcv.pdf",
-    },
   ]);
   const courseContentData = useSelector((state) => state.courseContent?.courseContent);
   const dispatch = useDispatch();
@@ -54,31 +40,68 @@ export default function Page({params}) {
 
   const [contentName, setContentName] = useState("");
   const [contentDescription, setContentDescription] = useState("");
+  const [courseData, setCourseData] = useState();
+  const [loading , setLoading] = useState(false);
 
-  useLayoutEffect(() => {
+  // useLayoutEffect(() => {
 
-    if(courseContentData){
-      return
-    }
+  //   if(courseContentData){
+  //     return
+  //   }
 
-    async function fetchCourseContent() {
-      try {
-        const response = await axios.get(`http://localhost:3000/content/${id}`, {
-          withCredentials: true,
-        });
-        console.log(response);
-        if (response.status === 200) {
-          dispatch(setCourseContent(response.data));
-        }
-      } catch (error) {
-        console.log(error);
+  //   async function fetchCourseContent() {
+  //     try {
+  //       const response = await axios.get(`http://localhost:3000/content/${id}`, {
+  //         withCredentials: true,
+  //       });
+        
+  //       if (response.status === 200) {
+  //         dispatch(setCourseContent(response.data.content));
+  //         setCourseData(response.data.course);
+  //         console.log(response.data.course);
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+
+  //   fetchCourseContent();
+  // }, [id, courseContentData, dispatch]);
+
+    useEffect(() => {
+      if(courseContentData){
+        return
       }
-    }
+      async function fetchCourseContent() {
+        try {
+          setLoading(true);
+          const response = await axios.get(`http://localhost:3000/content/${id}`, {
+            withCredentials: true,
+          });
+          if(response.status === 200){
+            setLoading(false);
+            if(response?.data?.content?.length > 0){
+              
+              dispatch(setCourseContent(response.data.content));
+              
+             
+            }
+            else {
+              setCourseContent([]);
+            }
+            setCourseData(response.data.course);
+            console.log(response.data.course);
+            console.log(courseContentData);
+          }
+        } catch (error) {
+          setLoading(false);
+          console.log(error);
+        }
+      }
+      fetchCourseContent();
+    }, [id, courseContentData, dispatch]);
 
-    fetchCourseContent();
-  }, [id, courseContentData, dispatch]);
 
-  
 
   
 
@@ -91,7 +114,7 @@ export default function Page({params}) {
     
     try{
   
-    const response = await axios.post(`http://localhost:3000/content/upload/${id}`, formData, {
+    const response = await axios.post(`${APIURL}/content/upload/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
@@ -125,10 +148,13 @@ export default function Page({params}) {
   return (
     <>
       <Navbar />
+      {loading && <div className="w-full h-screen flex justify-center items-center">Loading...</div>}
+      
+      {/* {!loading && courseContentData?.length > 0 && ( */}
       <div className="course-container flex flex-col w-11/12 h-fit mx-auto">
         <div className="course-header flex justify-between items-center w-full h-20 bg-white">
           <h1 className="text-2xl font-bold p-4">
-            Course Name
+            {courseData?.courseName}
             <span className="text-lg font-normal"> - Course Code</span>
             <span className="text-sm font-normal">
               <Button className="ml-4">Forum</Button>
@@ -237,6 +263,9 @@ export default function Page({params}) {
           )}
         </div>
       </div>
+      {/* )} */}
+
+      
 
       {addCourseDialog()}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
