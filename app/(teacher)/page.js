@@ -1,4 +1,4 @@
-
+"use client"
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import {
@@ -22,10 +22,27 @@ import Link from "next/link";
 import FloatingButton from "@/components/FloatingButton";
 import axios from "axios";
 import APIURL from "@/lib/variables";
+import { useEffect,useState} from "react";
+import{useRouter} from "next/navigation";
+import{useDispatch,useSelector} from "react-redux";
 
 export default function Home() {
+
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/login");
+    }
+  }
+  , [user]);
+
   
   return (
+    <>
+    {user && (
     <div className="container dashboard h-screen">
       <Navbar />
       <div className="flex justify-center items-start h-fit w-full ">
@@ -52,6 +69,14 @@ export default function Home() {
       
       <FloatingButton />
     </div>
+    )}
+    {!user && (
+      <div className="flex justify-center items-center h-screen w-full">
+        
+      </div>
+    
+    )}
+    </>
   );
 
   function coursesTable() {
