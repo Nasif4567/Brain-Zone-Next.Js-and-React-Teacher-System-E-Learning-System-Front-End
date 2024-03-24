@@ -24,7 +24,7 @@ import PDFViewer from "@/components/PDFViewer";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import {useDispatch, useSelector} from 'react-redux';
-import { setCourseContent, addNewContent,clearCourseContent } from "@/redux/courseContentSlice";
+import { setCourseContent, addNewContent,clearCourseContent,deleteContent,updateContent } from "@/redux/courseContentSlice";
 import APIURL from "@/lib/variables";
 export default function Page({params}) {
   const id = params.id;
@@ -46,6 +46,8 @@ export default function Page({params}) {
   const [loading , setLoading] = useState(true);
   const [selectedContentID, setSelectedContentID] = useState(null)  ;
   const [selectedContent, setSelectedContent] = useState(null);
+  const [editContent, setEditContent] = useState(null);
+  
 
 
 
@@ -56,7 +58,61 @@ export default function Page({params}) {
   }
 
 
+async function saveEdit() {
+  const formData = new FormData();
+  formData.append('file', editContent?.newFile);
+  formData.append('title', editContent?.contentTitle);
+  formData.append('description', editContent?.contentDescription);
+  formData.append('contentID', editContent?.contentID);
+ 
+  try{
+    const response = await axios.put(`${APIURL}/content/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      withCredentials: true
+    });
+    console.log(response);
 
+    toast({
+      title: "Content edited successfully",
+      description: "You have successfully edited a content",
+    });
+
+    if(response.status === 200){
+     dispatch(updateContent(
+      {
+        contentID: editContent?.contentID,
+        courseID: id,
+        contentTitle: response.data.contentTitle,
+        contentDescription: response.data.contentDescription,
+        contentURL: response.data.contentURL,
+        fileType: response.data.fileType,
+      }
+     )
+     )
+      setEditOpen(false);
+      
+      setSelectedContentID(null);
+      setSelectedContent(null);
+      setSelectedContentID(editContent?.contentID);
+      //replace the url with the new url and file type
+      setSelectedContent({
+        contentID: editContent?.contentID,
+        courseID: id,
+        contentTitle: response.data.contentTitle,
+        contentDescription: response.data.contentDescription,
+        contentURL: response.data.contentURL,
+        fileType: response.data.fileType,
+      });
+
+      setEditContent(null);
+
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 
  
@@ -219,7 +275,10 @@ useEffect(() => {
               <h2 className="text-2xl font-bold">
                   {selectedContent?.contentTitle}
               </h2>
-              <Button onClick={() => setEditOpen(true)}>Edit</Button>
+              <Button onClick={() => {
+              setEditOpen(true);
+              setEditContent(selectedContent);
+              }}>Edit</Button>
             </div>
             
               <div className="flex items-center justify-between space-x-4 px-4 w-full">
@@ -250,30 +309,20 @@ useEffect(() => {
                   )}
             
                   {selectedContent?.fileType.includes("image") && (
-                    <Image src={selectedContent?.contentURL} alt="content" width={500} height={500} />
+                    <Image src={selectedContent?.contentURL} alt="content" width={500} height={500}
+                    className="rounded-md shadow-md w-full"
+                    />
+                  )}
+                  {selectedContent?.fileType.includes("video") && (
+                    <video src={selectedContent?.contentURL} controls className="rounded-md shadow-md w-full"></video>
+                  
                   )}
 
 
                 </div>
               
-            <div className="w-full flex justify-between items-center my-8">
-              <h2 className="text-2xl font-bold">Assesstments</h2>
-            </div>
-            <div className="w-full flex flex-row  h-fit p-4 shadow-md rounded-md my-8">
-              <div className="w-1/5 h-full flex flex-col ">
-                <h3 className="text-2xl font-bold">Assesstment 1</h3>
-                <span className="text-sm font-normal">
-                  This is the first assesstment
-                </span>
-                <p className="text-sm font-normal">
-                  Due Date : 12th August 2021
-                </p>
-              </div>
-              <div className="w-4/5 h-full flex justify-end items-center">
-                <Button variant="ghost">Edit</Button>
-                <Button variant="ghost">Delete</Button>
-              </div>
-            </div>
+           
+            
           </div>
           )}
         </div>
@@ -309,22 +358,60 @@ useEffect(() => {
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Content Name</Label>
-              <Input id="name" placeholder="Title of your content" />
+              <Input id="name" placeholder="Title of your content"
+              value={editContent?.contentTitle}
+              onChange={(e) => setEditContent({...editContent, contentTitle: e.target.value})}
+              />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="description">Content Description</Label>
-              <Input id="description" placeholder="Description" />
+              <Input id="description" placeholder="Description" 
+              value={editContent?.contentDescription}
+              onChange={(e) => setEditContent({...editContent, contentDescription: e.target.value})}
+              />
             </div>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="category">Upload File</Label>
-              <Input type="file" id="file" placeholder="Upload File" />
+              <Label htmlFor="category">Uploaded File</Label>
+              <div className="flex items-center space-x-4">
+                <p className={`text-sm font-semibold
+                  hover:underline cursor-pointer text-blue-500 ${editContent?.newFile && 'line-through'} ${editContent?.newFile && 'text-red-500'}
+                
+                `}>
+                  {editContent?.contentURL.split('/').pop()}
+                </p>
+                <Button variant="ghost" size="sm"
+                onClick={() => {
+                  window.open(editContent?.contentURL, '_blank');
+                }
+                }
+                >
+                  Open File
+                </Button>
+
+
+                
+                
+                </div>
+                <Input type="file" id="file" placeholder="Replace File" 
+                onChange={(e) => {
+                  setEditContent({...editContent, 
+                  newFile: e.target.files[0]
+                  })
+                }
+                }
+                />
+
+                
             </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={() => setEditOpen(false)}>Save</Button>
+            <Button onClick={() => {
+              saveEdit();
+              setEditOpen(false);
+            }}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

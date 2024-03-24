@@ -19,10 +19,22 @@ const courseContentSlice = createSlice({
         addNewContent: (state, action) => {
             state.courseContent = [...state.courseContent, action.payload];
         },
+        deleteContent: (state, action) => {
+            state.courseContent = state.courseContent.filter((content) => content.contentID !== action.payload);
+        },
+        updateContent (state, action) {
+            state.courseContent = state.courseContent.map((content) => {
+                if (content.contentID === action.payload.contentID) {
+                    return action.payload;
+                }
+                return content;
+            }
+            );
+        }
 
     },
 });
 
 
-export const {setCourseContent, clearCourseContent, addNewContent} = courseContentSlice.actions;
+export const {setCourseContent, clearCourseContent, addNewContent,deleteContent,updateContent} = courseContentSlice.actions;
 export default courseContentSlice.reducer;
