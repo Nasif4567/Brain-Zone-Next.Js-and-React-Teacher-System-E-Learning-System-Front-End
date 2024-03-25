@@ -1,13 +1,9 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { CaretSortIcon, DownloadIcon } from "@radix-ui/react-icons";
+import React, { useEffect, useState } from "react";
+
+import {  DownloadIcon } from "@radix-ui/react-icons";
 import Image from 'next/image'
 import {
   Dialog,
@@ -16,7 +12,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +19,8 @@ import PDFViewer from "@/components/PDFViewer";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import {useDispatch, useSelector} from 'react-redux';
+import EditContentDialog from "@/components/EditContentDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { setCourseContent, addNewContent,clearCourseContent,deleteContent,updateContent } from "@/redux/courseContentSlice";
 import APIURL from "@/lib/variables";
 export default function Page({params}) {
@@ -47,6 +44,8 @@ export default function Page({params}) {
   const [selectedContentID, setSelectedContentID] = useState(null)  ;
   const [selectedContent, setSelectedContent] = useState(null);
   const [editContent, setEditContent] = useState(null);
+  const [assestments, setAssestments] = useState([]);
+  const [selectedAssestment, setSelectedAssestment] = useState(null);
   
 
 
@@ -96,7 +95,6 @@ async function saveEdit() {
       setSelectedContentID(null);
       setSelectedContent(null);
       setSelectedContentID(editContent?.contentID);
-      //replace the url with the new url and file type
       setSelectedContent({
         contentID: editContent?.contentID,
         courseID: id,
@@ -114,7 +112,47 @@ async function saveEdit() {
   }
 }
 
+async function addToList() {
+  const formData = new FormData();
+  formData.append('file', document.querySelector('#file').files[0]);
+  formData.append('title', contentName);
+  formData.append('description', contentDescription);
+  formData.append('type', 'pdf');
+  
+  try{
 
+  const response = await axios.post(`${APIURL}/content/upload/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    withCredentials: true
+  });
+  console.log(response);
+
+  toast({
+    title: "Content added successfully",
+    description: "You have successfully added a new content",
+  });
+
+  if(response.status === 200){
+   dispatch(addNewContent(
+    {
+      contentID: response.data.contentID,
+      courseID: id,
+      contentTitle: contentName,
+      contentDescription: contentDescription,
+      contentURL: response.data.contentURL,
+      fileType: response.data.fileType
+    }
+   ))
+    setOpen(false);
+  }
+} catch (error) {
+  console.log(error);
+}
+
+  
+}
  
 
     useEffect(() => {
@@ -124,6 +162,7 @@ async function saveEdit() {
           const response = await axios.get(`http://localhost:3002/content/${id}`, {
             withCredentials: true,
           });
+          
           if(response.status === 200){
           
             if(response?.data?.content?.length > 0){
@@ -151,59 +190,33 @@ async function saveEdit() {
           console.log(error);
         }
       }
+      async function fetchAssesstments() {
+        try {
+          setLoading(true);
+          const response = await axios.get(`${APIURL}/assestment/all/${id}`, {
+            withCredentials: true,
+          });
+          if(response.status === 200){
+            setAssestments(response.data);
+            console.log(response.data);
+            setLoading(false);
+          }
+        } catch (error) {
+          setLoading(false);
+          console.log(error);
+        }
+      }
      if(courseDataSlice?.courseID !== id){
         dispatch(clearCourseContent());
       
       fetchCourseContent();
+      fetchAssesstments();
      }
     }, [id]);
 
-useEffect(() => {
-  console.log(loading);
-}, [loading]);
-  
 
-  async function addToList() {
-    const formData = new FormData();
-    formData.append('file', document.querySelector('#file').files[0]);
-    formData.append('title', contentName);
-    formData.append('description', contentDescription);
-    formData.append('type', 'pdf');
-    
-    try{
-  
-    const response = await axios.post(`${APIURL}/content/upload/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      withCredentials: true
-    });
-    console.log(response);
 
-    toast({
-      title: "Content added successfully",
-      description: "You have successfully added a new content",
-    });
-
-    if(response.status === 200){
-     dispatch(addNewContent(
-      {
-        contentID: response.data.contentID,
-        courseID: id,
-        contentTitle: contentName,
-        contentDescription: contentDescription,
-        contentURL: response.data.contentURL,
-        fileType: response.data.fileType
-      }
-     ))
-      setOpen(false);
-    }
-  } catch (error) {
-    console.log(error);
-  }
   
-    
-  }
 
   return (
     <>
@@ -225,9 +238,17 @@ useEffect(() => {
             </Button>
           </div>
         </div>
+        <Tabs defaultValue="content">
+  <TabsList>
+    <TabsTrigger value="content">Content</TabsTrigger>
+    <TabsTrigger value="assestments">Assestments</TabsTrigger>
+  </TabsList>
+  <TabsContent value="content" className="w-full h-full">
         <div className="course-content flex w-full h-fit ">
+        
           <div className="course-sidebar w-1/5 h-full m-2  p-4 select-none">
-            <h2 className="text-xl font-bold my-2">Content</h2>
+          
+
             <ul className="space-y-2">
               {courseContentData?.map((content) => (
                 
@@ -326,6 +347,87 @@ useEffect(() => {
           </div>
           )}
         </div>
+       </TabsContent>
+  <TabsContent value="assestments">
+    <div className="course-content flex w-full h-fit ">
+                    <div className="assestment-sidebar w-1/5 h-full m-2  p-4 select-none">
+            <ul className="space-y-2">
+              {assestments?.map((assesstment) => (
+                
+                <li
+                  key={assesstment.assessmentID}
+                  onClick={() => {
+                    setSelectedAssestment(assesstment);
+                  
+                  }}
+                  className="text-lg  p-5 flex flex-col rounded-sm shadow-md transition-all cursor-pointer duration-300 hover:bg-gray-100"
+                >
+                  {
+                    assesstment.assessmentTitle
+                  }
+                  <span className="text-sm font-normal my-2">
+                    {assesstment?.assessmentDescription?.slice(0, 50)}
+                  </span>
+                </li>
+              ))}
+              {assestments?.length === 0 && (
+                <li className="text-lg  p-5 flex flex-col rounded-sm shadow-md transition-all cursor-pointer duration-300 hover:bg-gray-100">
+                  No assestments available
+                </li>
+              
+              )}
+            </ul>
+            </div>
+
+            {selectedAssestment === null && (
+            <div className="assestment-main w-4/5 h-full bg-white p-4">
+              <div className="w-full flex flex-col justify-between items-center mb-8">
+                <h2 className="text-2xl font-bold">Select an assestment</h2>
+                <p className="text-sm font-normal"> Click on an assestment to view</p>
+              </div>
+              
+              </div>
+          )}
+          {selectedAssestment &&  (
+          <div className="assestment-main w-4/5 h-full bg-white p-4">
+            <div className="w-full flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold">
+                  {selectedAssestment?.assessmentTitle}
+              </h2>
+              <Button onClick={() => {
+              setEditOpen(true);
+              setEditContent(selectedAssestment);
+              }
+              }>Edit</Button>
+
+              </div>
+
+              <div className="flex items-center justify-between space-x-4 px-4 w-full">
+                <h4 className="text-sm font-semibold">
+                  {selectedAssestment?.assessmentDescription}
+                </h4>
+                <div>
+
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    window.open(selectedAssestment?.assessmentURL, '_blank');
+                  }
+                  }>
+                    <DownloadIcon className="h-4 w-4" />
+                  </Button>
+
+                </div>
+
+                </div>
+                  </div>
+          )}
+
+
+
+        </div>
+
+
+  </TabsContent>
+</Tabs>
       </div>
       )}
       {loading && (
@@ -349,72 +451,7 @@ useEffect(() => {
       
 
       {addCourseDialog()}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Course Content</DialogTitle>
-            <DialogDescription>Edit your course content</DialogDescription>
-          </DialogHeader>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Content Name</Label>
-              <Input id="name" placeholder="Title of your content"
-              value={editContent?.contentTitle}
-              onChange={(e) => setEditContent({...editContent, contentTitle: e.target.value})}
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="description">Content Description</Label>
-              <Input id="description" placeholder="Description" 
-              value={editContent?.contentDescription}
-              onChange={(e) => setEditContent({...editContent, contentDescription: e.target.value})}
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="category">Uploaded File</Label>
-              <div className="flex items-center space-x-4">
-                <p className={`text-sm font-semibold
-                  hover:underline cursor-pointer text-blue-500 ${editContent?.newFile && 'line-through'} ${editContent?.newFile && 'text-red-500'}
-                
-                `}>
-                  {editContent?.contentURL.split('/').pop()}
-                </p>
-                <Button variant="ghost" size="sm"
-                onClick={() => {
-                  window.open(editContent?.contentURL, '_blank');
-                }
-                }
-                >
-                  Open File
-                </Button>
-
-
-                
-                
-                </div>
-                <Input type="file" id="file" placeholder="Replace File" 
-                onChange={(e) => {
-                  setEditContent({...editContent, 
-                  newFile: e.target.files[0]
-                  })
-                }
-                }
-                />
-
-                
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => {
-              saveEdit();
-              setEditOpen(false);
-            }}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {EditContentDialog(editOpen, setEditOpen, editContent, setEditContent, saveEdit)}
     </>
   );
 
@@ -549,3 +586,4 @@ useEffect(() => {
     );
   }
 }
+
