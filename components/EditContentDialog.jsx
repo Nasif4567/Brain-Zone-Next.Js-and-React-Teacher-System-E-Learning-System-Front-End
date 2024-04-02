@@ -39,7 +39,7 @@ export default function EditContentDialog(editOpen, setEditOpen, editContent, se
                   hover:underline cursor-pointer text-blue-500 ${editContent?.newFile && 'line-through'} ${editContent?.newFile && 'text-red-500'}
                 
                 `}>
-              {editContent?.contentURL.split('/').pop()}
+              {editContent?.contentURL?.split('/').pop()}
             </p>
             <Button variant="ghost" size="sm"
               onClick={() => {

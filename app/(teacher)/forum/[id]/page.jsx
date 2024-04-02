@@ -6,8 +6,11 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import APIURL from "@/lib/variables";
+import { useRouter } from "next/navigation";
+
 
 export default function page({ params }) {
+  const router = useRouter();
   const { id } = params;
   const [questions, setQuestions] = useState([
     {
@@ -90,6 +93,8 @@ export default function page({ params }) {
   const [answer, setAnswer] = useState("");
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [courseName, setCourseName] = useState("");
+  const [courseID, setCourseID] = useState("");
 
   useEffect(() => {
     axios
@@ -97,7 +102,9 @@ export default function page({ params }) {
         withCredentials: true,
       })
       .then((response) => {
-        setQuestions(response.data);
+        setQuestions(response.data.questions);
+        setCourseName(response.data.courseName);
+        setCourseID(response.data.courseId);
       })
       .catch((error) => {
         console.error("Error fetching questions:", error);
@@ -190,7 +197,13 @@ export default function page({ params }) {
       <div className="flex md:flex-row w-screen  h-screen">
         <div className="w-1/3 flex flex-col  px-4 py-6 space-y-6 md:px-6 overflow-auto">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Forum - Course Name</h1>
+            <h1 className="text-3xl font-bold">Forum -
+            <span 
+            onClick={() => router.push(`/course/${id}`)}
+            className="font-normal text-gray-500 dark:text-gray-400 cursor-pointer">
+              {courseName}
+            </span>
+            </h1>
             <div className="relative max-w-lg">
               <div className="absolute inset-y-0 flex items-center pl-3">
                 <SearchIcon className="h-5 w-5 text-gray-400" />
