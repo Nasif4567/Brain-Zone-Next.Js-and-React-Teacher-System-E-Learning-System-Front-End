@@ -70,9 +70,17 @@ export default  function Page() {
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
       </div>}
       
-        {courses.map((course) => (
+        {courses?.map((course) => (
           <CourseCard key={course.courseID} course={course} />
         ))}
+        {courses?.length === 0 && (
+          <div className="w-full h-full flex items-center justify-center">
+            <p className="text-lg font-semibold text-gray-500">
+              No courses available
+            </p>
+          </div>
+        )}
+        
       </div>
     </div>
      <FloatingButton />

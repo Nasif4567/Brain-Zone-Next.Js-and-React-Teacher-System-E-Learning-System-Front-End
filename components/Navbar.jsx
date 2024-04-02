@@ -32,12 +32,7 @@ const Navbar = () => {
         <Link href={"/"}>
           <h2 className="text-2xl font-sans font-semibold">Teacher</h2>
         </Link>
-        <ul className="flex space-x-4">
-          <Link href={"/course"}>
-            <li>Courses</li>
-          </Link>
-          <li>Students</li>
-        </ul>
+       
 
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -53,10 +48,10 @@ const Navbar = () => {
               Welcome {user?.name?.split(" ")[0]}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+           <Link href="/course">
             <DropdownMenuItem>Courses</DropdownMenuItem>
-            <DropdownMenuItem>Students</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            </Link>
+           
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {

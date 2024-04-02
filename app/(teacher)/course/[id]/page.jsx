@@ -59,6 +59,61 @@ export default function Page({ params }) {
   const [newAssesstmentQuestion, setNewAssesstmentQuestion] = useState("");
   const [newAssesstmentAnswer, setNewAssesstmentAnswer] = useState("");
   const [newAssesstmentDueDate, setNewAssesstmentDueDate] = useState("");
+  const [openEdit, setOpenEdit] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteAssessmentOpen, setDeleteAssessmentOpen] = useState(false);
+
+
+  const deleteContentWithID = async () => {
+   
+      
+    try {
+      const response = await axios.delete(
+        `${APIURL}/content/${selectedContent?.contentID}`,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+
+      if (response.status === 200) {
+        dispatch(deleteContent(selectedContent?.contentID));
+        setDeleteOpen(false);
+        setSelectedContentID(null);
+        setSelectedContent(null);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteAssesstmentWithID = async () => {
+    try {
+      const response = await axios.delete(
+        `${APIURL}/assestment/delete/${selectedAssestment?.assessmentID}`,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+
+      if (response.status === 200) {
+        setAssestments(
+          assestments.filter(
+            (assesstment) =>
+              assesstment.assessmentID !== selectedAssestment?.assessmentID
+          )
+        );
+        setDeleteOpen(false);
+        setSelectedAssestment(null);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
+
+
 
   const clickedContent = (contentID) => {
     setSelectedContentID(contentID);
@@ -120,6 +175,46 @@ export default function Page({ params }) {
       console.log(error);
     }
   }
+  async function saveEditAssesstment() {
+    console.log(editContent);
+    try{
+      const response = await axios.put(`${APIURL}/assestment/update/${editContent?.assessmentID}`, {
+        title: editContent?.assessmentTitle,
+        description: editContent?.assessmentDescription,
+        questionJSON: JSON.stringify(editContent?.questionsJson),
+        assessmentDeadline: editContent?.assessmentDeadline,
+        assessmentID: editContent?.assessmentID,
+      }, {
+        withCredentials: true,
+      });
+
+      if(response.status === 200){
+        setAssestments(
+          assestments.map((assesstment) => {
+            if(assesstment.assessmentID === editContent?.assessmentID){
+              return {
+                ...assesstment,
+                assessmentTitle: editContent?.assessmentTitle,
+                assessmentDescription: editContent?.assessmentDescription,
+                questionsJson: editContent?.questionsJson,
+                assessmentDeadline: editContent?.assessmentDeadline,
+              }
+            }
+            return assesstment;
+          })
+        );
+        setEditContent(null);
+        setSelectedAssestment(null);
+        setOpenEdit(false);
+      }
+
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
+
+
 
   async function addToList() {
     const formData = new FormData();
@@ -241,16 +336,16 @@ export default function Page({ params }) {
     }
   }
 
+  
+  
+
   useEffect(() => {
     async function fetchCourseContent() {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `http://localhost:3002/content/${id}`,
-          {
-            withCredentials: true,
-          }
-        );
+        const response = await axios.get(`${APIURL}/content/${id}`, {
+          withCredentials: true,
+        });
 
         if (response.status === 200) {
           if (response?.data?.content?.length > 0) {
@@ -279,12 +374,12 @@ export default function Page({ params }) {
           withCredentials: true,
         });
         if (response.status === 200) {
-            const jsonParsed = response.data.map((assesstment) => {
-              return {
-                ...assesstment,
-                questionsJson: JSON.parse(assesstment.questionsJson),
-              };
-            });
+          const jsonParsed = response.data.map((assesstment) => {
+            return {
+              ...assesstment,
+              questionsJson: JSON.parse(assesstment.questionsJson),
+            };
+          });
 
           setAssestments(jsonParsed);
           console.log(jsonParsed);
@@ -295,13 +390,12 @@ export default function Page({ params }) {
         console.log(error);
       }
     }
-    if (courseDataSlice?.courseID !== id) {
-      dispatch(clearCourseContent());
 
-      fetchCourseContent();
-      fetchAssesstments();
-    }
-  }, [id]);
+    fetchCourseContent();
+    fetchAssesstments();
+  }
+  , [id]);
+
 
   return (
     <>
@@ -386,6 +480,7 @@ export default function Page({ params }) {
                       <h2 className="text-2xl font-bold">
                         {selectedContent?.contentTitle}
                       </h2>
+                      <div className="flex items-center space-x-4">
                       <Button
                         onClick={() => {
                           setEditOpen(true);
@@ -394,6 +489,15 @@ export default function Page({ params }) {
                       >
                         Edit
                       </Button>
+                      <Button
+                      variant="destructive"
+                        onClick={() => {
+                          setDeleteOpen(true);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between space-x-4 px-4 w-full">
@@ -484,14 +588,24 @@ export default function Page({ params }) {
                       <h2 className="text-2xl font-bold">
                         {selectedAssestment?.assessmentTitle}
                       </h2>
+                      <div className="flex items-center space-x-4">
                       <Button
                         onClick={() => {
-                          setEditOpen(true);
+                          setOpenEdit(true);
                           setEditContent(selectedAssestment);
                         }}
                       >
                         Edit
                       </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setDeleteAssessmentOpen(true);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between space-x-4 px-4 w-full">
@@ -555,8 +669,10 @@ export default function Page({ params }) {
           <Button onClick={() => setOpen(true)}>Add Content</Button>
         </div>
       )}
-
+      {deleteAssesstmentDialog()}
+      { deleteContentDialog()}
       {addCourseDialog()}
+      {editAssesstmentDialog()}
       {EditContentDialog(
         editOpen,
         setEditOpen,
@@ -566,6 +682,32 @@ export default function Page({ params }) {
       )}
     </>
   );
+
+  function deleteContentDialog() {
+    return (
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Content</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this content?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setDeleteOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => deleteContentWithID()}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   function addCourseDialog() {
     const [contentType, setContentType] = useState();
@@ -767,4 +909,202 @@ export default function Page({ params }) {
       </Dialog>
     );
   }
+  function editAssesstmentDialog() {
+    return (
+      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Assesstment</DialogTitle>
+            <DialogDescription>Edit your assestment</DialogDescription>
+          </DialogHeader>
+          <div className="grid w-full items-center gap-4 h-[70vh] overflow-y-scroll">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">Assesstment Name</Label>
+              <Input
+                id="name"
+                placeholder="Title of your assestment"
+                value={editContent?.assessmentTitle}
+                onChange={(e) => 
+                  setEditContent({
+                    ...editContent,
+                    assessmentTitle: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="description">Assesstment Description</Label>
+              <Input
+                id="description"
+                placeholder="Description"
+                value={editContent?.assessmentDescription}
+                onChange={(e) => 
+                  setEditContent({
+                    ...editContent,
+                    assessmentDescription: e.target.value,
+                  })
+                }
+              />
+              <Label htmlFor="duedate">Due Date</Label>
+              <Input type="date" id="duedate"
+              value={editContent?.assessmentDeadline}
+              onChange={(e) => 
+                setEditContent({
+                  ...editContent,
+                  assessmentDeadline: e.target.value,
+                })
+              }
+              />
+              <hr />
+              {editContent?.questionsJson?.map((question, index) => (
+                
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="question">Question {index + 1}</Label>
+                  <Input
+                    id="question"
+                    placeholder="Question"
+                    value={question.question}
+                    onChange={(e) => {
+                      const newQuestions = editContent?.questionsJson.map(
+                        (q, i) => {
+                          if (i === index) {
+                            return {
+                              ...q,
+                              question: e.target.value,
+                            };
+                          }
+                          return q;
+                        }
+                      );
+                      setEditContent({
+                        ...editContent,
+                        questionsJson: newQuestions,
+                      });
+                    }}
+                  />
+                  <Input
+                    id="answer"
+                    placeholder="Answer"
+                    value={question.answer}
+                    onChange={(e) => {
+                      const newQuestions = editContent?.questionsJson.map(
+                        (q, i) => {
+                          if (i === index) {
+                            return {
+                              ...q,
+                              answer: e.target.value,
+                            };
+                          }
+                          return q;
+                        }
+                      );
+                      setEditContent({
+                        ...editContent,
+                        questionsJson: newQuestions,
+                      });
+                    }}
+                  />
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      const newQuestions = editContent?.questionsJson.filter(
+                        (q, i) => i !== index
+                      );
+                      setEditContent({
+                        ...editContent,
+                        questionsJson: newQuestions,
+                      });
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ))}
+              <Label htmlFor="question">Question</Label>
+              <Input
+                id="question"
+                placeholder="Question"
+                value={newAssesstmentQuestion}
+                onChange={(e) => setNewAssesstmentQuestion(e.target.value)}
+              />
+              <Input
+                id="answer"
+                placeholder="Answer"
+                value={newAssesstmentAnswer}
+                onChange={(e) => setNewAssesstmentAnswer(e.target.value)}
+              />
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (newAssesstmentQuestion === "" || newAssesstmentAnswer === "") {
+                    toast({
+                      title: "Empty fields",
+                      description: "Please fill in all fields",
+                    });
+                    return;
+                  }
+
+                  setEditContent({
+                    ...editContent,
+                    questionsJson: [
+                      ...editContent?.questionsJson,
+                      {
+                        question: newAssesstmentQuestion,
+                        answer: newAssesstmentAnswer,
+                      },
+                    ],
+                  });
+                  setNewAssesstmentQuestion("");
+                  setNewAssesstmentAnswer("");
+                }}
+              >
+                Add Question
+              </Button>
+
+            </div>
+           
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpenEdit(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              saveEditAssesstment()
+              setOpenEdit(false)}}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  function deleteAssesstmentDialog() {
+    return (
+      <Dialog open={deleteAssessmentOpen} onOpenChange={setDeleteAssessmentOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Assesstment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this assestment?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setDeleteAssessmentOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              deleteAssesstmentWithID()
+              setDeleteAssessmentOpen(false)
+            }}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  
 }

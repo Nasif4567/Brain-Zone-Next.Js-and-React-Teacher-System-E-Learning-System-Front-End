@@ -18,7 +18,7 @@ export default function FloatingButton() {
           <Link href="/create-course">
             <DropdownMenuItem>Create Course</DropdownMenuItem>
           </Link>
-          <DropdownMenuItem>Create Assestment</DropdownMenuItem>
+          
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
