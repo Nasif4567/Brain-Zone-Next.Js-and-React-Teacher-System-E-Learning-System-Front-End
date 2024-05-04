@@ -42,6 +42,7 @@ export default function Page({ params }) {
   const courseContentData = useSelector((state) => state.course?.courseContent);
   const courseDataSlice = useSelector((state) => state.course?.courseData);
   const dispatch = useDispatch();
+  const [courseContentVideos, setCourseContentVideos] = useState([]);
 
   const [contentName, setContentName] = useState("");
   const [contentDescription, setContentDescription] = useState("");
@@ -129,6 +130,7 @@ export default function Page({ params }) {
     formData.append("title", editContent?.contentTitle);
     formData.append("description", editContent?.contentDescription);
     formData.append("contentID", editContent?.contentID);
+    formData.append("video", editContent?.newVideo);
 
     try {
       const response = await axios.put(`${APIURL}/content/${id}`, formData, {
@@ -149,10 +151,10 @@ export default function Page({ params }) {
           updateContent({
             contentID: editContent?.contentID,
             courseID: id,
-            contentTitle: response.data.contentTitle,
-            contentDescription: response.data.contentDescription,
-            contentURL: response.data.contentURL,
-            fileType: response.data.fileType,
+            contentTitle: editContent?.contentTitle,
+            contentDescription: editContent?.contentDescription,
+            contentURL: response.data.contentURL ? response.data.contentURL : editContent?.contentURL,
+            videoURL: response.data.videoURL ? response.data.videoURL : editContent?.videoURL,
           })
         );
         setEditOpen(false);
@@ -163,10 +165,11 @@ export default function Page({ params }) {
         setSelectedContent({
           contentID: editContent?.contentID,
           courseID: id,
-          contentTitle: response.data.contentTitle,
-          contentDescription: response.data.contentDescription,
-          contentURL: response.data.contentURL,
-          fileType: response.data.fileType,
+          contentTitle: editContent?.contentTitle,
+          contentDescription: editContent?.contentDescription,
+          contentURL: response.data.contentURL ? response.data.contentURL : editContent?.contentURL,
+          videoURL: response.data.videoURL ? response.data.videoURL : editContent?.videoURL,
+          
         });
 
         setEditContent(null);
@@ -222,7 +225,9 @@ export default function Page({ params }) {
     formData.append("title", contentName);
     formData.append("description", contentDescription);
     formData.append("type", "pdf");
+    formData.append("video",document.querySelector("#video").files[0] );
 
+    console.log(formData);
     try {
       const response = await axios.post(
         `${APIURL}/content/upload/${id}`,
@@ -346,7 +351,7 @@ export default function Page({ params }) {
         const response = await axios.get(`${APIURL}/content/${id}`, {
           withCredentials: true,
         });
-
+console.log(response)
         if (response.status === 200) {
           if (response?.data?.content?.length > 0) {
             dispatch(
@@ -518,26 +523,14 @@ export default function Page({ params }) {
                     </div>
 
                     <div className="rounded-md border px-4 py-2 font-mono text-sm shadow-sm">
-                      {selectedContent?.fileType === "application/pdf" && (
-                        <PDFViewer pdfURL={selectedContent?.contentURL} />
-                      )}
+                          {/* //videoURL */}
+                          <h3>Video</h3>
+                          <video
+                            src={selectedContent?.videoURL}
+                            controls
+                            className="w-full"
+                          ></video>
 
-                      {selectedContent?.fileType.includes("image") && (
-                        <Image
-                          src={selectedContent?.contentURL}
-                          alt="content"
-                          width={500}
-                          height={500}
-                          className="rounded-md shadow-md w-full"
-                        />
-                      )}
-                      {selectedContent?.fileType.includes("video") && (
-                        <video
-                          src={selectedContent?.contentURL}
-                          controls
-                          className="rounded-md shadow-md w-full"
-                        ></video>
-                      )}
                     </div>
                   </div>
                 )}
@@ -637,7 +630,9 @@ export default function Page({ params }) {
                         <div className="w-full h-fit p-2 rounded-sm my-2 bg-gray-200">
                       {selectedAssestment?.questionsJson?.map(
                         (question, index) => (
-                          <div className="flex flex-col space-y-2">
+                          <div className="flex flex-col space-y-2"
+                          key={index}
+                          >
                             <h4 className="text-sm font-semibold">
                               Question {index + 1}
                             </h4>
@@ -740,8 +735,14 @@ export default function Page({ params }) {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="category">Upload File</Label>
+                <Label htmlFor="file">Upload File</Label>
                 <Input type="file" id="file" placeholder="Upload File" />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="video">Upload Video</Label>
+                <Input type="file" id="video" placeholder="Upload Video"
+                
+                />
               </div>
             </div>
           )}
@@ -871,6 +872,13 @@ export default function Page({ params }) {
               </Button>
               <Button
                 onClick={() => {
+                  if(!contentName || !contentDescription || !document.querySelector("#file").files[0] || !courseContentVideos ){
+                    toast({
+                      title: "Empty fields",
+                      description: "Please fill in all fields",
+                    });
+                    return;
+                  }
                   addToList();
                   setOpen(false);
                   setContentName("");
@@ -958,7 +966,9 @@ export default function Page({ params }) {
               <hr />
               {editContent?.questionsJson?.map((question, index) => (
                 
-                <div className="flex flex-col space-y-1.5">
+                <div className="flex flex-col space-y-1.5"
+                  key={index}
+                >
                   <Label htmlFor="question">Question {index + 1}</Label>
                   <Input
                     id="question"

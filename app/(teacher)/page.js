@@ -143,7 +143,7 @@ export default function Home() {
           <TableHeader>
             
             <TableRow>
-              <TableHead className="w-[100px]">Code</TableHead>
+              
               <TableHead>Name</TableHead>
               <TableHead>Assestments</TableHead>
               <TableHead> Category</TableHead>
@@ -161,7 +161,7 @@ export default function Home() {
               className="cursor-pointer"
               onClick={() => router.push(`/course/${course.courseID}`)}
               >
-                <TableCell>{course.courseID}</TableCell>
+                
                 <TableCell>{course.courseName}</TableCell>
                 
                 <TableCell>{course.coursePrice} USD</TableCell>

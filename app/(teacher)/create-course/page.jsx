@@ -22,7 +22,7 @@ export default function Page() {
   const [steps, setSteps] = useState(0);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+const [coursePhoto, setCoursePhoto] = useState(null);
   const incrementSteps = () => setSteps(steps + 1);
 
   const [courseData, setCourseData] = useState({
@@ -34,6 +34,7 @@ export default function Page() {
     difficulty: "",
     language: "",
     outcome: "",
+    photo : ""
   });
 
   const categories = [
@@ -67,7 +68,21 @@ export default function Page() {
   const createCourse = async () => {
     try {
       setLoading(true);
-      const res = await axios.post(`${APIURL}/course/create`, courseData, {
+      const formData = new FormData();
+      formData.append("photo", coursePhoto);
+      formData.append("name", courseData.name);
+      formData.append("description", courseData.description);
+      formData.append("category", courseData.category);
+      formData.append("length", courseData.length);
+      formData.append("price", courseData.price);
+      formData.append("difficulty", courseData.difficulty);
+      formData.append("language", courseData.language);
+      formData.append("outcome", courseData.outcome);
+      const res = await axios.post(`${APIURL}/course/create`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          
+        },
         withCredentials: true,
       });
      
@@ -147,6 +162,17 @@ export default function Page() {
                       onChange={(e) =>
                         setCourseData({ ...courseData, category: e.value })
                       }
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="Image">Image</Label>
+                    <Input
+                      id="Image"
+                      
+                      type="file"
+                      accept="image/*"
+                      
+                      onChange={(e) => setCoursePhoto(e.target.files[0])}
                     />
                   </div>
                 </div>
@@ -240,7 +266,8 @@ export default function Page() {
                 disabled={
                   !courseData.name ||
                   !courseData.description ||
-                  !courseData.category
+                  !courseData.category || !coursePhoto
+                  
                 }
               >
                 Next
