@@ -1,7 +1,7 @@
 ## Screenshot of the teacher portal - ( Note same images are used just for demo but can be changed in teacher's system)
 
 
-[Backend of this application can be found here click to navigate](https://github.com/Nasif4567/Brain-zone-e-Learning-StudentBackend)
+[Backend of this application can be found here click to navigate](https://github.com/Nasif4567/Brain-Zone-Teacher-System-E-learning-System--Backend)
 
 
 
